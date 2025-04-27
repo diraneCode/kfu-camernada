@@ -91,7 +91,7 @@ export default function Header() {
 
           {profile && <Button
             variant="default"
-            className="bg-red-600 hover:bg-red-700"
+            className="hidden lg:flex bg-red-600 hover:bg-red-700"
             onClick={signOut}
           >
             <LogOut className="mr-2 h-4 w-4" />
