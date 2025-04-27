@@ -37,7 +37,7 @@ export default function RootLayout({
             </AuthProvider>
           </ReactQueryProvider>
         </ThemeProvider>
-        <Toaster />
+        <Toaster richColors />
       </body>
     </html >
   )
