@@ -5,9 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
 import { useState } from "react"
-
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,6 +30,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext" // import de ton contexte
 
 import { Loader2 } from "lucide-react" // pour spinner joli (facultatif)
+import { RedirectIfAuthenticated } from "@/components/RedirectIfAuthenticated"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   email: z.string().email("Adresse email invalide"),
@@ -55,18 +55,35 @@ export default function LoginPage() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setLoading(true)
-      await signIn(values.email, values.password)
-      toast.success("Connexion réussie 🎉")
-      router.push("/evenements/")
+      setLoading(true);
+      const result = await signIn(values.email, values.password);
+
+      console.log("Résultat de la connexion :", result); // Ajout pour déboguer
+
+      if (result.success) {
+        toast.success("Connexion réussie 🎉");
+        router.push("/evenements/"); // Redirection en cas de succès
+      } else {
+        if (result.error == "AuthApiError: Invalid login credentials") {
+          toast.error("Adresse email ou mot de passe incorrect 🚫")
+        }
+        if(result.error == "AuthApiError: Email not confirmed"){
+          toast.error("Vous n'avez pas encore confirmer votre email", {
+            description: "Veuillez vous rendre dans la messagerie que vous avez choisis pour vérifier votre adresse"
+          })
+        }
+        // toast.error(result.error || "Erreur lors de la connexion ❌")
+      }
     } catch (error: any) {
-      toast.error(error.message || "Erreur lors de la connexion ❌")
+      toast.error("Erreur inattendue lors de la connexion ❌");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
+
   return (
+    // <RedirectIfAuthenticated>
     <div className="flex items-center justify-center min-h-screen px-4 py-12">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
@@ -156,5 +173,6 @@ export default function LoginPage() {
         </Form>
       </Card>
     </div>
+    // </RedirectIfAuthenticated>
   )
 }

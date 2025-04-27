@@ -7,12 +7,13 @@ import { supabase } from '@/lib/supabase'
 import { Session, User } from '@supabase/supabase-js'
 import { TUser } from '@/types/user'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
     user: User | null
     profile: TUser | null
     loading: boolean
-    signIn: (email: string, password: string) => Promise<void>
+    signIn: (email: string, password: string) => Promise<{ success: boolean, error?: string }>
     signOut: () => Promise<void>
 }
 
@@ -22,6 +23,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null)
     const [profile, setProfile] = useState<TUser | null>(null)
     const [loading, setLoading] = useState(true)
+    const router = useRouter();
 
     useEffect(() => {
         const getSession = async () => {
@@ -66,21 +68,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    const signIn = async (email: string, password: string) => {
-        setLoading(true)
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const signIn = async (email: string, password: string): Promise<{ success: boolean, error?: string }> => {
+        setLoading(true);
 
-        if (error) {
-            console.error('Erreur connexion', error)
-            throw error
-        }
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-        if (data.session?.user) {
-            setUser(data.session.user)
-            await fetchUserProfile(data.session.user.id)
+            if (data.session?.user) {
+                setUser(data.session.user);
+                await fetchUserProfile(data.session.user.id);
+                return { success: true };
+            }
+
+            // Si aucune session n'est trouvée, retournez une erreur par défaut
+            return { success: false, error: '' + error };
+        } catch (error: any) {
+            console.error('Erreur connexion', error);
+
+            // Retourner l'erreur selon le code d'erreur
+            switch (error.status) {
+                case 400:
+                    return { success: false, error: 'Adresse email ou mot de passe incorrect 🚫' };
+                case 403:
+                    return { success: false, error: 'Veuillez confirmer votre adresse email avant de vous connecter 📩' };
+                case 404:
+                    return { success: false, error: 'Utilisateur introuvable ❌' };
+                default:
+                    return { success: false, error: 'Une erreur inconnue est survenue ❗' };
+            }
+        } finally {
+            setLoading(false);
         }
-        setLoading(false)
-    }
+    };
+
+
 
     const signOut = async () => {
         const signOutPromise = async () => {
@@ -91,7 +112,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         toast.promise(
-            signOutPromise(),
+            signOutPromise().then(() => {
+                router.push('/') // Rediriger après déconnexion réussie
+            }),
             {
                 loading: 'Déconnexion en cours...',
                 success: 'Déconnecté avec succès ✅',
@@ -99,6 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         )
     }
+
 
 
     return (

@@ -5,7 +5,6 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from "@/components/cart-provider"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -34,11 +33,11 @@ export default function RootLayout({
                   </main>
                   <Footer />
                 </div>
-                <Toaster />
               </CartProvider>
             </AuthProvider>
           </ReactQueryProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html >
   )
@@ -49,4 +48,5 @@ import './globals.css'
 import ReactQueryProvider from "@/providers/ReactQueryProvider"
 import { Suspense } from "react"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { Toaster } from "sonner"
 

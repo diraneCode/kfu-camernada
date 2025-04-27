@@ -21,7 +21,6 @@ const routes = [
   { href: "/a-propos", label: "À propos" },
 ]
 
-
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const pathname = usePathname()
@@ -90,38 +89,53 @@ export default function Header() {
             </Button>
           </Link>}
 
-          {profile && <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <nav className="flex flex-col gap-4 mt-8">
-                {routes.map((route) => (
-                  <Link
-                    key={route.href}
-                    href={route.href}
-                    className={cn(
-                      "text-lg font-medium transition-colors hover:text-red-600 p-2 rounded-md",
-                      pathname === route.href
-                        ? "bg-red-50 text-red-600 dark:bg-red-950/20"
-                        : "text-gray-700 dark:text-gray-200",
-                    )}
-                  >
-                    {route.label}
-                  </Link>
-                ))}
-                <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
-                <Link href="/connexion" className="text-lg font-medium transition-colors hover:text-red-600 p-2">
-                  Connexion
-                </Link>
-                <Link href="/inscription" className="text-lg font-medium transition-colors hover:text-red-600 p-2">
-                  Inscription
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <nav className="flex flex-col gap-4 mt-8">
+                  {routes.map((route) => (
+                    <Link
+                      key={route.href}
+                      href={route.href}
+                      className={cn(
+                        "text-lg font-medium transition-colors hover:text-red-600 p-2 rounded-md",
+                        pathname === route.href
+                          ? "bg-red-50 text-red-600 dark:bg-red-950/20"
+                          : "text-gray-700 dark:text-gray-200",
+                      )}
+                    >
+                      {route.label}
+                    </Link>
+                  ))}
+                  <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
+                  {!profile ? (
+                    <>
+                      <Link href="/connexion" className="text-lg font-medium transition-colors hover:text-red-600 p-2">
+                        Connexion
+                      </Link>
+                      <Link href="/inscription" className="text-lg font-medium transition-colors hover:text-red-600 p-2">
+                        Inscription
+                      </Link>
+                    </>
+                  ) : (
+                    <Button
+                      variant="default"
+                      className="bg-red-600 hover:bg-red-700"
+                      onClick={signOut}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Déconnexion
+                    </Button>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
 
           {!profile ? <div className="hidden md:flex gap-2">
             <Link href="/connexion">
@@ -132,15 +146,7 @@ export default function Header() {
                 Inscription
               </Button>
             </Link>
-          </div> :
-            <Button
-              variant="default"
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Déconnexion
-            </Button>
-          }
+          </div> : null}
         </div>
       </div>
       <CartSheet open={isOpen} onOpenChange={setIsOpen} />
