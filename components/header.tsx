@@ -89,6 +89,15 @@ export default function Header() {
             </Button>
           </Link>}
 
+          {profile && <Button
+            variant="default"
+            className="bg-red-600 hover:bg-red-700"
+            onClick={signOut}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Déconnexion
+          </Button>}
+
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
